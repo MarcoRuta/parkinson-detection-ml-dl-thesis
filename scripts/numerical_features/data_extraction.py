@@ -16,13 +16,13 @@ parkinson_data_path = 'E:/Desktop/Parkinson_py/dataset/numerical_dataset/hw_data
 control_file_list = [os.path.join( control_data_path, x ) for x in os.listdir( control_data_path )]
 parkinson_file_list = [os.path.join( parkinson_data_path, x ) for x in os.listdir( parkinson_data_path )]
 
-
+# conta il numero di strokes
 def get_no_strokes(df):
-    pressure_data = df['Pressure'].as_matrix()
+    pressure_data = df['Pressure'].to_numpy()
     on_surface = (pressure_data > 600).astype(int)
     return ((np.roll(on_surface, 1) - on_surface) != 0).astype(int).sum()
 
-
+# conta il numero di strokes nei test statici
 def count_strokes(f):
     global header_row
     dat_pat = pd.read_csv( f, sep=';', header=None, names=header_row )
@@ -32,6 +32,7 @@ def count_strokes(f):
     sns.tsplot(dat_pat['Pressure'], dat_pat['Timestamp'])
 
 
+# calcola e ritorna Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel
 def find_velocity(f):
     data_pat = f
     Vel = []
@@ -81,6 +82,7 @@ def find_velocity(f):
     return Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel
 
 
+# calcola e ritorna  accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc
 def find_acceleration(f):
     '''
     change in direction and its velocity
@@ -110,6 +112,7 @@ def find_acceleration(f):
     return accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc
 
 
+# calcola e ritorna jerk, magnitude, hrz_jerk, vert_jerk, timestamp_diff, magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk
 def find_jerk(f):
     accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc = find_acceleration(
         f )
@@ -136,6 +139,7 @@ def find_jerk(f):
     return jerk, magnitude, hrz_jerk, vert_jerk, timestamp_diff, magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk
 
 
+# calcola e ritorna il numero di variazioni di accellerazione per semicerchio
 def NCA_per_halfcircle(f):
     data_pat = f
     Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel = find_velocity(
@@ -161,6 +165,7 @@ def NCA_per_halfcircle(f):
     return nca, nca_Val
 
 
+# calcola e ritorna il numero di variazioni di velocità per semicerchio
 def NCV_per_halfcircle(f):
     data_pat = f
     Vel = []
@@ -185,12 +190,7 @@ def NCV_per_halfcircle(f):
     return ncv, ncv_Val
 
 
-def get_no_strokes(df):
-    pressure_data = df['Pressure'].to_numpy()
-    on_surface = (pressure_data > 600).astype( int )
-    return ((np.roll( on_surface, 1 ) - on_surface) != 0).astype( int ).sum()
-
-
+# calcola e ritorna la velocità in un punto
 def get_speed(df):
     total_dist = 0
     duration = df['Timestamp'].to_numpy()[-1]
@@ -202,16 +202,26 @@ def get_speed(df):
     return speed
 
 
+# calcola e ritorna il tempo in cui la penna non è stata in contatto con il supporto
 def get_in_air_time(data):
     data = data['Pressure'].to_numpy()
     return (data < 600).astype( int ).sum()
 
 
+# calcola e ritorna il tempo in cui la penna non è in contatto con il supporto
 def get_on_surface_time(data):
     data = data['Pressure'].to_numpy()
     return (data > 600).astype( int ).sum()
 
 
+# calcola e ritorna le seguenti features ['no_strokes_st', 'no_strokes_dy', 'speed_st', 'speed_dy', 'magnitude_vel_st',
+#                     'magnitude_horz_vel_st', 'magnitude_vert_vel_st', 'magnitude_vel_dy', 'magnitude_horz_vel_dy',
+#                     'magnitude_vert_vel_dy', 'magnitude_acc_st', 'magnitude_horz_acc_st', 'magnitude_vert_acc_st',
+#                     'magnitude_acc_dy', 'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'magnitude_jerk_st',
+#                     'magnitude_horz_jerk_st', 'magnitude_vert_jerk_st', 'magnitude_jerk_dy', 'magnitude_horz_jerk_dy',
+#                     'magnitude_vert_jerk_dy', 'ncv_st', 'ncv_dy', 'nca_st', 'nca_dy', 'in_air_stcp', 'on_surface_st',
+#                     'on_surface_dy', 'target']
+# come parametri ha il file da cui estrarre le features e 1 o 0 se test PD o Control
 def get_features(f, parkinson_target):
     global header_row
     df = pd.read_csv( f, sep=';', header=None, names=header_row )
@@ -233,88 +243,106 @@ def get_features(f, parkinson_target):
     data_point.append( get_speed( df_static ) if df_static.shape[0] else 0 )  # speed for static test
     data_point.append( get_speed( df_dynamic ) if df_dynamic.shape[0] else 0 )  # speed for dynamic test
 
-    # magnitudes of velocity, horizontal velocity and vertical velocity for static test
+    # magnitudes of velocity, horizontal velocity e vertical velocity static test
     Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel = find_velocity(
         df ) if df_static.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_vel, magnitude_horz_vel, magnitude_vert_vel] )
 
-    # magnitudes of velocity, horizontal velocity and vertical velocity for dynamic test
+    # magnitudes of velocity, horizontal velocity e vertical velocity dynamic test
     Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel = find_velocity(
         df_dynamic ) if df_dynamic.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_vel, magnitude_horz_vel, magnitude_vert_vel] )
 
-    # magnitudes of acceleration, horizontal acceleration and vertical acceleration for static test
+    # magnitudes of acceleration, horizontal acceleration e vertical acceleration static test
     accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc = find_acceleration(
         df_static ) if df_static.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_acc, magnitude_horz_acc, magnitude_vert_acc] )
 
-    # magnitudes of acceleration, horizontal acceleration and vertical acceleration for dynamic test
+    # magnitudes of acceleration, horizontal acceleration e vertical acceleration dynamic test
     accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc = find_acceleration(
         df_dynamic ) if df_dynamic.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_acc, magnitude_horz_acc, magnitude_vert_acc] )
 
-    # magnitudes of jerk, horizontal jerk and vertical jerk for static test
+    # magnitudes of jerk, horizontal jerk e vertical jerk static test
     jerk, magnitude, hrz_jerk, vert_jerk, timestamp_diff, magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk = find_jerk(
         df_static ) if df_static.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk] )
 
-    # magnitudes of jerk, horizontal jerk and vertical jerk for dynamic test
+    # magnitudes of jerk, horizontal jerk e vertical jerk dynamic test
     jerk, magnitude, hrz_jerk, vert_jerk, timestamp_diff, magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk = find_jerk(
         df_dynamic ) if df_dynamic.shape[0] else (0, 0, 0, 0, 0, 0, 0, 0)
     data_point.extend( [magnitude_jerk, magnitude_horz_jerk, magnitude_vert_jerk] )
 
-    # NCV for static test
+    # NCV static test
     ncv, ncv_Val = NCV_per_halfcircle( df_static ) if df_static.shape[0] else (0, 0)
     data_point.append( ncv_Val )
 
-    # NCV for dynamic test
+    # NCV dynamic test
     ncv, ncv_Val = NCV_per_halfcircle( df_dynamic ) if df_dynamic.shape[0] else (0, 0)
     data_point.append( ncv_Val )
 
-    # NCA for static test
+    # NCA static test
     nca, nca_Val = NCA_per_halfcircle( df_static ) if df_static.shape[0] else (0, 0)
     data_point.append( nca_Val )
 
-    # NCA for dynamic test
+    # NCA dynamic test
     nca, nca_Val = NCA_per_halfcircle( df_dynamic ) if df_dynamic.shape[0] else (0, 0)
     data_point.append( nca_Val )
 
     # in air time for STCP
     data_point.append( get_in_air_time( df_stcp ) if df_stcp.shape[0] else 0 )
 
-    # on surface time for static test
+    # on surface time static test
     data_point.append( get_on_surface_time( df_static ) if df_static.shape[0] else 0 )
 
-    # on surface time for dynamic test
+    # on surface time dynamic test
     data_point.append( get_on_surface_time( df_dynamic ) if df_dynamic.shape[0] else 0 )
 
-    # traget. 1 for parkinson. 0 for control.
+    # traget. 1 parkinson. 0 control.
     data_point.append( parkinson_target )
 
     return data_point
 
-
-raw = []
-
-for x in parkinson_file_list:
-    raw.append( get_features( x, 1 ) )
-
-for x in control_file_list:
-    raw.append( get_features( x, 0 ) )
-
-
-raw = np.array( raw )
+# i dati presenti nelle righe tra 13 e 18 (ho eseguito data check manuale dato che sono 78 istanze) non sono veritieri
+# per non eliminare le istanze ho deciso di modificare i campi a 0 (dove lo 0 non è possibile) con la media della colonna
+def data_cleaning(df):
+    features = list(df.columns.values)
+    for n in [13, 14, 15, 16, 17, 18]:
+        for f in features:
+            if int(df.loc[n][[f]]) == 0 and str(f) != 'target':
+                df.loc[n][[f]] = df[[f]].mean()
+    return df
 
 
-features_headers = ['no_strokes_st', 'no_strokes_dy', 'speed_st', 'speed_dy', 'magnitude_vel_st',
-                    'magnitude_horz_vel_st', 'magnitude_vert_vel_st', 'magnitude_vel_dy', 'magnitude_horz_vel_dy',
-                    'magnitude_vert_vel_dy', 'magnitude_acc_st', 'magnitude_horz_acc_st', 'magnitude_vert_acc_st',
-                    'magnitude_acc_dy', 'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'magnitude_jerk_st',
-                    'magnitude_horz_jerk_st', 'magnitude_vert_jerk_st', 'magnitude_jerk_dy', 'magnitude_horz_jerk_dy',
-                    'magnitude_vert_jerk_dy', 'ncv_st', 'ncv_dy', 'nca_st', 'nca_dy', 'in_air_stcp', 'on_surface_st',
-                    'on_surface_dy', 'target']
 
-data = pd.DataFrame( raw )
-data.columns = features_headers
 
-data.to_csv( r'E:\Desktop\Parkinson_py\dataset\numerical_dataset\extracted_data.csv', index=False )
+if __name__ == '__main__':
+
+
+    raw = []
+
+    for x in parkinson_file_list:
+        raw.append( get_features( x, 1 ) )
+
+    for x in control_file_list:
+        raw.append( get_features( x, 0 ) )
+
+
+    raw = np.array( raw )
+
+
+    features_headers = ['no_strokes_st', 'no_strokes_dy', 'speed_st', 'speed_dy', 'magnitude_vel_st',
+                        'magnitude_horz_vel_st', 'magnitude_vert_vel_st', 'magnitude_vel_dy', 'magnitude_horz_vel_dy',
+                        'magnitude_vert_vel_dy', 'magnitude_acc_st', 'magnitude_horz_acc_st', 'magnitude_vert_acc_st',
+                        'magnitude_acc_dy', 'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'magnitude_jerk_st',
+                        'magnitude_horz_jerk_st', 'magnitude_vert_jerk_st', 'magnitude_jerk_dy', 'magnitude_horz_jerk_dy',
+                        'magnitude_vert_jerk_dy', 'ncv_st', 'ncv_dy', 'nca_st', 'nca_dy', 'in_air_stcp', 'on_surface_st',
+                        'on_surface_dy', 'target']
+
+    data = pd.DataFrame( raw )
+    data.columns = features_headers
+
+    data = data_cleaning(data)
+
+    # salvare in \dataset\numerical_dataset
+    data.to_csv( r'E:\Desktop\Parkinson_py\dataset\numerical_dataset\extracted_data.csv', index=False )

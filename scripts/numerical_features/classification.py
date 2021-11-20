@@ -22,7 +22,7 @@ classifiers = [
     RandomForestClassifier(),
     SVC(),
     DecisionTreeClassifier(),
-    KNeighborsClassifier( 10 ),
+    KNeighborsClassifier( 3 ),
     GaussianNB(),
     GradientBoostingClassifier( n_estimators=1000 ),
 ]
@@ -188,4 +188,5 @@ if __name__ == '__main__':
     # come path va fornito quello del file extracted_data.csv
     df, train_x, train_y, test_x, test_y = data_load_and_split(
         'E:/Desktop/Parkinson_py/dataset/numerical_dataset/extracted_data.csv' )
+
     classify( train_x, train_y, test_x, test_y )
