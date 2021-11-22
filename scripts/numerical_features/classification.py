@@ -133,13 +133,13 @@ def data_load_and_split(path):
     # Divisione di training/testing set
     pos = df[df['target'] == 1]
     neg = df[df['target'] == 0]
-
-    train_pos = pos.head( pos.shape[0] - 5 )
-    train_neg = neg.head( pos.shape[0] - 5 )
+    train_pos = pos.head( pos.shape[0] - 15 )
+    train_neg = neg.head( pos.shape[0] - 4 )
     train = pd.concat( [train_pos, train_neg] )
 
-    test_pos = pos.tail( 5 )
-    test_neg = neg.tail( 5 )
+    # 15/62 positivi e 4/15 negativi per il testing (circa il 25%)
+    test_pos = pos.tail( 15 )
+    test_neg = neg.tail( 4 )
     test = pd.concat( [test_pos, test_neg] )
 
     train_y = train['target']
