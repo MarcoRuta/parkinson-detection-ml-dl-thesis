@@ -181,51 +181,82 @@ def load_and_split_data(trainingPath, testingPath):
 
 
 # funzione che calcola ed inserisce in una tabella per ogni classificatore:
-# accuracy, precision, recall, F1
-def classify(trainX, trainY, testX, testY):
-
+# matrice di confusione, accuracy, precision, recall, F1
+# e attraverso 10-fold cross validation calcola la media di accuracy, precision, recall, F1
+def classify(train_x, train_y, test_x, test_y):
     t = PrettyTable(
-        ['Name', 'Accuracy', 'Precision', 'Recall', 'F1'] )
-
+        ['Name', 'Confusion Matrix', 'Accuracy', 'Precision', 'Recall', 'F1', 'avg Accuracy', 'avg Precision',
+         'avg Recall',
+         'avg F1'] )
 
     for name, clf in zip( names, classifiers ):
-        clf.fit( trainX, trainY )
-        preds = clf.predict( testX )
-        _accuracy = accuracy( testY.tolist(), preds.tolist() )
-        _metrics = metrics( testY.tolist(), preds.tolist() )
+        clf.fit( train_x, train_y )
+        preds = clf.predict( test_x )
+        _accuracy = accuracy( test_y.tolist(), preds.tolist() )
+        _metrics = metrics( test_y.tolist(), preds.tolist() )
+
+        _avg_accuracy = cross_val_score( clf, train_x, train_y, cv=10, scoring='accuracy' )
+        _avg_precision = cross_val_score( clf, train_x, train_y, cv=10, scoring='precision_macro' )
+        _avg_recall = cross_val_score( clf, train_x, train_y, cv=10, scoring='recall_macro' )
+        _avg_F1 = cross_val_score( clf, train_x, train_y, cv=10, scoring='f1_macro' )
+
+        predictions = cross_val_predict( clf, train_x, train_y, cv=10 )
+        matrice = confusion_matrix( train_y, predictions )
 
         t.add_row(
-            [colored( name, 'blue' ),  round( _accuracy, 3 ), round( _metrics['Precision'], 3 ),
-             round( _metrics['Recall'], 3 ), round( _metrics['F1'], 3 )])
+            [colored( name, 'blue' ), matrice, round( _accuracy, 3 ), round( _metrics['Precision'], 3 ),
+             round( _metrics['Recall'], 3 ), round( _metrics['F1'], 3 ),
+             round( _avg_accuracy.mean(), 3 ), round( _avg_precision.mean(), 3 ), round( _avg_recall.mean(), 3 ),
+             round( _avg_F1.mean(), 3 )] )
 
-        t.add_row( ['', '', '', '', ''] )
+        t.add_row( ['', '', '', '', '', '', '', '', '', ''] )
 
     print( t )
 
-
-# funzione che calcola ed inserisce in una tabella per ogni classificatore:
-# accuracy, precision, recall, F1
-# matrice di confusione e media di accuracy, precision, recall e F1 calcolata attraverso 10-fold cross validation
-def cross_val(trainX, trainY):
-
-    t = PrettyTable(['name', 'confusion matrix', 'avg Accuracy', 'avg Precision', 'avg Recall', 'avg F1'])
-
-    for name, clf in zip( ['Logistic regression','random forest','decision tree'],
-                          [LogisticRegression( max_iter=500 ),
-                          RandomForestClassifier(),
-                          DecisionTreeClassifier()] ):
-
-        _avg_accuracy = cross_val_score( clf, trainX, trainY, cv=10, scoring='accuracy' )
-        _avg_precision = cross_val_score( clf, trainX, trainY, cv=10, scoring='precision_macro' )
-        _avg_recall = cross_val_score( clf, trainX, trainY, cv=10, scoring='recall_macro' )
-        _avg_F1 = cross_val_score( clf, trainX, trainY, cv=10, scoring='f1_macro' )
-        predictions = cross_val_predict( clf, trainX, trainY, cv=10 )
-        matrice = confusion_matrix( trainY, predictions )
-        t.add_row(
-            [colored( name, 'blue' ), matrice,round( _avg_accuracy.mean(), 3 ),
-             round( _avg_precision.mean(), 3 ), round( _avg_recall.mean(), 3 ),round( _avg_F1.mean(), 3 )] )
-        t.add_row( ['', '', '', '', '', ''] )
-    print(t)
+# # funzione che calcola ed inserisce in una tabella per ogni classificatore:
+# # accuracy, precision, recall, F1
+# def classify(trainX, trainY, testX, testY):
+#
+#     t = PrettyTable(
+#         ['Name', 'Accuracy', 'Precision', 'Recall', 'F1'] )
+#
+#
+#     for name, clf in zip( names, classifiers ):
+#         clf.fit( trainX, trainY )
+#         preds = clf.predict( testX )
+#         _accuracy = accuracy( testY.tolist(), preds.tolist() )
+#         _metrics = metrics( testY.tolist(), preds.tolist() )
+#
+#         t.add_row(
+#             [colored( name, 'blue' ),  round( _accuracy, 3 ), round( _metrics['Precision'], 3 ),
+#              round( _metrics['Recall'], 3 ), round( _metrics['F1'], 3 )])
+#
+#         t.add_row( ['', '', '', '', ''] )
+#
+#     print( t )
+#
+#
+# # funzione che calcola ed inserisce in una tabella per ogni classificatore:
+# # accuracy, precision, recall, F1
+# # matrice di confusione e media di accuracy, precision, recall e F1 calcolata attraverso 10-fold cross validation
+# def cross_val(trainX, trainY):
+#
+#     t = PrettyTable(['name', 'confusion matrix', 'avg Accuracy', 'avg Precision', 'avg Recall', 'avg F1'])
+#
+#     for name, clf in zip( names, classifiers ):
+#         print( 'sto facendo cross' )
+#
+#         _avg_accuracy = cross_val_score( clf, trainX, trainY, cv=10, scoring='accuracy' )
+#         _avg_precision = cross_val_score( clf, trainX, trainY, cv=10, scoring='precision_macro' )
+#         _avg_recall = cross_val_score( clf, trainX, trainY, cv=10, scoring='recall_macro' )
+#         _avg_F1 = cross_val_score( clf, trainX, trainY, cv=10, scoring='f1_macro' )
+#         predictions = cross_val_predict( clf, trainX, trainY, cv=10 )
+#         matrice = confusion_matrix( trainY, predictions )
+#         t.add_row(
+#             [colored( name, 'blue' ), matrice,round( _avg_accuracy.mean(), 3 ),
+#              round( _avg_precision.mean(), 3 ), round( _avg_recall.mean(), 3 ),round( _avg_F1.mean(), 3 )] )
+#         t.add_row( ['', '', '', '', '', ''] )
+#     print(t)
 
 # pulisce le directory che sono state riempite con data_augmentation
 def clear_data():
@@ -267,6 +298,6 @@ if __name__ == '__main__':
 
     classify( trainX, trainY, testX, testY )
 
-    cross_val(trainX, trainY)
+    # cross_val(trainX, trainY)
 
     clear_data()

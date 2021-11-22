@@ -186,7 +186,7 @@ if __name__ == '__main__':
         'img_height': 256,
         'train_data_dir': 'E:/Desktop/Parkinson_py/dataset/image_dataset/spiral/training',
         'validation_data_dir': 'E:/Desktop/Parkinson_py/dataset/image_dataset/spiral/testing',
-        'epochs': 800,
+        'epochs': 350,
         'batch_size': 24,
         'zoom_range': 0.1,
         'rotation_range': 360,

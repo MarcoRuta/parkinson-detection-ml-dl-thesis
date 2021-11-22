@@ -138,8 +138,8 @@ def data_load_and_split(path):
     train_neg = neg.head( pos.shape[0] - 5 )
     train = pd.concat( [train_pos, train_neg] )
 
-    test_pos = pos.tail( 25 )
-    test_neg = neg.tail( 15 )
+    test_pos = pos.tail( 5 )
+    test_neg = neg.tail( 5 )
     test = pd.concat( [test_pos, test_neg] )
 
     train_y = train['target']
