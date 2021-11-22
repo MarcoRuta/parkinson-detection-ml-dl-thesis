@@ -4,10 +4,6 @@ import os
 import seaborn as sns
 from math import sqrt
 
-# Test ID:
-# 0: Static Spiral Test
-# 1: Dynamic Spiral Test
-# 2: Circular Motion Test
 header_row = ["X", "Y", "Z", "Pressure", "GripAngle", "Timestamp", "Test_ID"]
 
 control_data_path = 'E:/Desktop/Parkinson_py/dataset/numerical_dataset/hw_dataset/control'
@@ -16,20 +12,12 @@ parkinson_data_path = 'E:/Desktop/Parkinson_py/dataset/numerical_dataset/hw_data
 control_file_list = [os.path.join( control_data_path, x ) for x in os.listdir( control_data_path )]
 parkinson_file_list = [os.path.join( parkinson_data_path, x ) for x in os.listdir( parkinson_data_path )]
 
+
 # conta il numero di strokes
 def get_no_strokes(df):
     pressure_data = df['Pressure'].to_numpy()
     on_surface = (pressure_data > 600).astype(int)
     return ((np.roll(on_surface, 1) - on_surface) != 0).astype(int).sum()
-
-# conta il numero di strokes nei test statici
-def count_strokes(f):
-    global header_row
-    dat_pat = pd.read_csv( f, sep=';', header=None, names=header_row )
-    dat_pat = dat_pat[dat_pat["Test_ID"] == 0]  # Use only static test
-    initial_timestamp = dat_pat['Timestamp'][0]
-    dat_pat['Timestamp'] = dat_pat['Timestamp'] - initial_timestamp
-    sns.tsplot(dat_pat['Pressure'], dat_pat['Timestamp'])
 
 
 # calcola e ritorna Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel
@@ -228,14 +216,10 @@ def get_features(f, parkinson_target):
 
     df_static = df[df["Test_ID"] == 0]  # static test
     df_dynamic = df[df["Test_ID"] == 1]  # dynamic test
-    df_stcp = df[df["Test_ID"] == 2]  # STCP
 
     initial_timestamp = df['Timestamp'][0]
     df['Timestamp'] = df['Timestamp'] - initial_timestamp  # offset timestamps
 
-    duration_static = df_static['Timestamp'].to_numpy()[-1] if df_static.shape[0] else 1
-    duration_dynamic = df_dynamic['Timestamp'].to_numpy()[-1] if df_dynamic.shape[0] else 1
-    duration_STCP = df_stcp['Timestamp'].to_numpy()[-1] if df_stcp.shape[0] else 1
 
     data_point = []
     data_point.append( get_no_strokes( df_static ) if df_static.shape[0] else 0 )  # no. of strokes for static test
@@ -289,8 +273,6 @@ def get_features(f, parkinson_target):
     nca, nca_Val = NCA_per_halfcircle( df_dynamic ) if df_dynamic.shape[0] else (0, 0)
     data_point.append( nca_Val )
 
-    # in air time for STCP
-    data_point.append( get_in_air_time( df_stcp ) if df_stcp.shape[0] else 0 )
 
     # on surface time static test
     data_point.append( get_on_surface_time( df_static ) if df_static.shape[0] else 0 )
@@ -303,21 +285,20 @@ def get_features(f, parkinson_target):
 
     return data_point
 
+
 # i dati presenti nelle righe tra 13 e 18 (ho eseguito data check manuale dato che sono 78 istanze) non sono veritieri
 # per non eliminare le istanze ho deciso di modificare i campi a 0 (dove lo 0 non è possibile) con la media della colonna
 def data_cleaning(df):
-    features = list(df.columns.values)
+    features = list( df.columns.values )
     for n in [13, 14, 15, 16, 17, 18]:
         for f in features:
-            if int(df.loc[n][[f]]) == 0 and str(f) != 'target':
+            if int( df.loc[n][[f]] ) == 0 and str( f ) != 'target' and str( f ) != 'no_strokes_st' and str(
+                    f ) != 'no_strokes_dy':
                 df.loc[n][[f]] = df[[f]].mean()
     return df
 
 
-
-
 if __name__ == '__main__':
-
 
     raw = []
 
@@ -327,22 +308,22 @@ if __name__ == '__main__':
     for x in control_file_list:
         raw.append( get_features( x, 0 ) )
 
-
     raw = np.array( raw )
-
 
     features_headers = ['no_strokes_st', 'no_strokes_dy', 'speed_st', 'speed_dy', 'magnitude_vel_st',
                         'magnitude_horz_vel_st', 'magnitude_vert_vel_st', 'magnitude_vel_dy', 'magnitude_horz_vel_dy',
                         'magnitude_vert_vel_dy', 'magnitude_acc_st', 'magnitude_horz_acc_st', 'magnitude_vert_acc_st',
                         'magnitude_acc_dy', 'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'magnitude_jerk_st',
-                        'magnitude_horz_jerk_st', 'magnitude_vert_jerk_st', 'magnitude_jerk_dy', 'magnitude_horz_jerk_dy',
-                        'magnitude_vert_jerk_dy', 'ncv_st', 'ncv_dy', 'nca_st', 'nca_dy', 'in_air_stcp', 'on_surface_st',
+                        'magnitude_horz_jerk_st', 'magnitude_vert_jerk_st', 'magnitude_jerk_dy',
+                        'magnitude_horz_jerk_dy',
+                        'magnitude_vert_jerk_dy', 'ncv_st', 'ncv_dy', 'nca_st', 'nca_dy',
+                        'on_surface_st',
                         'on_surface_dy', 'target']
 
     data = pd.DataFrame( raw )
     data.columns = features_headers
 
-    data = data_cleaning(data)
+    data = data_cleaning( data )
 
     # salvare in \dataset\numerical_dataset
     data.to_csv( r'E:\Desktop\Parkinson_py\dataset\numerical_dataset\extracted_data.csv', index=False )

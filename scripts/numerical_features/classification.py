@@ -72,7 +72,7 @@ def correlation(df):
 
     related_features = ['no_strokes_st', 'magnitude_horz_vel_st', 'magnitude_vel_dy',
                         'magnitude_horz_vel_dy', 'magnitude_vert_vel_dy', 'magnitude_acc_dy',
-                        'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'ncv_dy', 'nca_st', 'nca_dy', 'in_air_stcp',
+                        'magnitude_horz_acc_dy', 'magnitude_vert_acc_dy', 'ncv_dy', 'nca_st', 'nca_dy',
                         'target']
 
     # Heatmap della correlazione tra tutti gli attributi
