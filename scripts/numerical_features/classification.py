@@ -33,7 +33,7 @@ names = [
     'Random Forest',
     'SVC',
     'Decision Tree',
-    'KNeighbors'
+    'KNeighbors',
     'Gaussian Process',
     'Gradient Boosting',
 ]
