@@ -3,7 +3,7 @@
 
 ```
 ├─ dataset
-│  ├─ augmented_dataset @dataset in cui a run time vengono salvate e successivamente eliminate le immagini prodotte attraverso data augmentation
+│  ├─ augmented_dataset 
 │  │  ├─ testing
 │  │  │  ├─ healthy
 │  │  │  └─ parkinson
@@ -18,7 +18,7 @@
 │  │     ├─ testing
 │  │     │  ├─ healthy
 │  │     │  └─ parkinson
-│  │ 
+│  |     |  
 │  │     └─ training
 │  │        ├─ healthy
 │  │        └─ parkinson
@@ -28,35 +28,60 @@
 │  └─ numerical_dataset @dataset UCI, numerico
 │     │ 
 │     │
-│     ├─ extracted_data.csv @features estratte dal dataset UCI attraverso lo script data_extraction.py
+│     ├─ extracted_data.csv 
 │     │
-│     ├─ extracted_data_fancy.xlsxp @versione human friendly di extracted_data
+│     ├─ extracted_data_fancy.xlsxp 
 │     │
-│     ├─ hw_dataset @dati numerici
+│     ├─ hw_dataset 
 │     │  ├─ control
 │     │  └─ parkinson
 │     │
-│     └─ hw_drawings @immagini relative ai dati numerici, sono presenti solo in parte (25/78)
+│     └─ hw_drawings 
 │        ├─ Dynamic Spiral Test
 │        └─ Static Spiral Test
 │             
 │  
-└─ scripts
-   ├─ image_processing @script utilizzati per eseguire image processing sul dataset NIATS
-   │  ├─ CNN_classification.py @data augmentation, estrazione HOG e classificazione attraverso rete neurale
-   |  ├─ image processing.py @data augmentation, estrazione HOG e classificazione attraverso diversi classificatori
-   │  ├─ spiral_weights.h5 @pesi della rete neurale
-   │  └─ V01HE01.png @immagine presa dal dataset
-   │  
-   │  
-   │  
-   └─ numerical_features
-      ├─ classification.py @estrazione delle features dai dati del dataset UCI
-      └─ data_extraction.py @classificazione attraverso diversi classificatori
+├─ README.md
+│
+│
+│
+├─ results
+│  ├─ CNN Results
+│  │  ├─ epoch_ custom CNN.png
+│  │  ├─ epoch_ResNet.png
+│  │  ├─ epoch_VGG.png
+│  │  ├─ history_custom CNN.png
+│  │  ├─ history_ResNet.png
+│  │  ├─ history_VGG.png
+│  │  ├─ ROC_custom CNN.png
+│  │  ├─ ROC_ResNet.png
+│  │  └─ ROC_VGG.png
+│  ├─ image_processing_results
+│  │  ├─ hog_example.png
+│  │  └─ image_processing_res.png
+│  └─ numerical_features_results
+│     ├─ corr_matrix.png
+│     └─ numerical_feature_res.png
+│
+│
+│
+├─ scripts
+│  ├─ image_processing
+│  │  ├─ CNN_classification.py
+│  │  ├─ custom_cnn.h5
+│  │  ├─ image processing.py 
+│  │  ├─ Resnet_classification.py
+│  │  ├─ resnet_spiral.h5
+│  │  ├─ spiral_weights.h5
+│  │  ├─ V01HE01.png
+│  │  ├─ vgg16_spiral.h5
+│  │  └─ VGG_classification.py
+│  │
+│  │
+│  └─ numerical_features
+│     ├─ classification.py
+│     └─ data_extraction.py
+└─ tesi
+   └─ Capitoli 1 e 3.pdf
 
-Nella cartella results sono riportate le immagini con i risultati per:
-
-- classificatori su dataset UCI
-- classificatori su dataset NIATS
-- rete neurale su dataset NIATS
 ```
