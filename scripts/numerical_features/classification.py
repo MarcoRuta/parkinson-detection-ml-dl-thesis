@@ -19,22 +19,18 @@ warnings.filterwarnings( 'ignore' )
 # I classificatori utilizzati
 classifiers = [
     LogisticRegression( max_iter=500, solver="lbfgs" ),
-    RandomForestClassifier(),
-    SVC(),
-    DecisionTreeClassifier(),
+    RandomForestClassifier(max_features=3, max_leaf_nodes= 3),
+    DecisionTreeClassifier(max_depth = 5),
     KNeighborsClassifier( 3 ),
-    GaussianNB(),
-    GradientBoostingClassifier( n_estimators=1000 ),
+    GradientBoostingClassifier( n_estimators=10 ),
 ]
 
 # I nomi dei classificatori utilizzati
 names = [
     'Logistic Regression',
     'Random Forest',
-    'SVC',
     'Decision Tree',
     'KNeighbors',
-    'Gaussian Process',
     'Gradient Boosting',
 ]
 
@@ -133,13 +129,13 @@ def data_load_and_split(path):
     # Divisione di training/testing set
     pos = df[df['target'] == 1]
     neg = df[df['target'] == 0]
-    train_pos = pos.head( pos.shape[0] - 15 )
-    train_neg = neg.head( pos.shape[0] - 4 )
+    train_pos = pos.head( pos.shape[0] - 31 )
+    train_neg = neg.head( pos.shape[0] - 8 )
     train = pd.concat( [train_pos, train_neg] )
 
     # 15/62 positivi e 4/15 negativi per il testing (circa il 25%)
-    test_pos = pos.tail( 15 )
-    test_neg = neg.tail( 4 )
+    test_pos = pos.tail( 31 )
+    test_neg = neg.tail( 8 )
     test = pd.concat( [test_pos, test_neg] )
 
     train_y = train['target']
@@ -154,6 +150,11 @@ def data_load_and_split(path):
 # matrice di confusione, accuracy, precision, recall, F1
 # e attraverso 10-fold cross validation calcola la media di accuracy, precision, recall, F1
 def classify(train_x, train_y, test_x, test_y):
+    test_x.sample( frac=1 )
+    test_y.sample( frac=1 )
+    train_y.sample( frac=1 )
+    train_x.sample(frac=1 )
+
     t = PrettyTable(
         ['Name', 'Confusion Matrix', 'Accuracy', 'Precision', 'Recall', 'F1', 'avg Accuracy', 'avg Precision',
          'avg Recall',
@@ -165,13 +166,19 @@ def classify(train_x, train_y, test_x, test_y):
         _accuracy = accuracy( test_y.tolist(), preds.tolist() )
         _metrics = metrics( test_y.tolist(), preds.tolist() )
 
-        _avg_accuracy = cross_val_score( clf, train_x, train_y, cv=10, scoring='accuracy' )
-        _avg_precision = cross_val_score( clf, train_x, train_y, cv=10, scoring='precision_macro' )
-        _avg_recall = cross_val_score( clf, train_x, train_y, cv=10, scoring='recall_macro' )
-        _avg_F1 = cross_val_score( clf, train_x, train_y, cv=10, scoring='f1_macro' )
+        x = pd.concat([train_x,test_x])
+        y = pd.concat( [train_y, test_y] )
 
-        predictions = cross_val_predict( clf, train_x, train_y, cv=10 )
-        matrice = confusion_matrix( train_y, predictions )
+        x.sample( frac=1 )
+        y.sample( frac=1 )
+
+        _avg_accuracy = cross_val_score( clf, x, y, cv=2, scoring='accuracy' )
+        _avg_precision = cross_val_score( clf, x, y, cv=2, scoring='precision_macro' )
+        _avg_recall = cross_val_score( clf, x, y, cv=2, scoring='recall_macro' )
+        _avg_F1 = cross_val_score( clf, x, y, cv=2, scoring='f1_macro' )
+
+        predictions = cross_val_predict( clf, test_x, test_y, cv=2 )
+        matrice = confusion_matrix( test_y, predictions )
 
         t.add_row(
             [colored( name, 'blue' ), matrice, round( _accuracy, 3 ), round( _metrics['Precision'], 3 ),

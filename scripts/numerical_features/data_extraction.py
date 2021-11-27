@@ -44,21 +44,14 @@ def find_velocity(f):
 
             vert_Vel.append( (data_pat['Y'].to_numpy()[t + 10] - data_pat['Y'].to_numpy()[t]) / (
                     data_pat['Timestamp'].to_numpy()[t + 10] - data_pat['Timestamp'].to_numpy()[t]) )
+
             magnitude.append( sqrt( ((data_pat['X'].to_numpy()[t + 10] - data_pat['X'].to_numpy()[t]) / (
                     data_pat['Timestamp'].to_numpy()[t + 10] - data_pat['Timestamp'].to_numpy()[t])) ** 2 + (((
-                                                                                                                      data_pat[
-                                                                                                                          'Y'].to_numpy()[
-                                                                                                                          t + 10] -
-                                                                                                                      data_pat[
-                                                                                                                          'Y'].to_numpy()[
-                                                                                                                          t]) / (
-                                                                                                                      data_pat[
-                                                                                                                          'Timestamp'].to_numpy()[
-                                                                                                                          t + 10] -
-                                                                                                                      data_pat[
-                                                                                                                          'Timestamp'].to_numpy()[
-                                                                                                                          t])) ** 2) ) )
+                    data_pat['Y'].to_numpy()[t + 10] - data_pat['Y'].to_numpy()[t]) /
+                    (data_pat['Timestamp'].to_numpy()[t + 10] -data_pat[ 'Timestamp'].to_numpy()[t])) ** 2) ) )
+
             timestamp_diff.append( data_pat['Timestamp'].to_numpy()[t + 10] - data_pat['Timestamp'].to_numpy()[t] )
+
             horz_vel_mag.append( abs( horz_Vel[len( horz_Vel ) - 1] ) )
             vert_vel_mag.append( abs( vert_Vel[len( vert_Vel ) - 1] ) )
             t = t + 10
@@ -72,10 +65,7 @@ def find_velocity(f):
 
 # calcola e ritorna  accl, magnitude, horz_Accl, vert_Accl, timestamp_diff, magnitude_acc, magnitude_horz_acc, magnitude_vert_acc
 def find_acceleration(f):
-    '''
-    change in direction and its velocity
 
-    '''
     Vel, magnitude, timestamp_diff, horz_Vel, vert_Vel, magnitude_vel, magnitude_horz_vel, magnitude_vert_vel = find_velocity(
         f )
     accl = []
@@ -299,7 +289,6 @@ def data_cleaning(df):
 
 
 if __name__ == '__main__':
-
     raw = []
 
     for x in parkinson_file_list:

@@ -66,6 +66,7 @@ def data_augmentation():
         shuffle=True  # Change to False if using plot_roc
     )
 
+
     return (train_datagen, validation_datagen, train_generator, validation_generator)
 
 
@@ -107,7 +108,7 @@ if __name__ == '__main__':
         'img_height': 256,
         'train_data_dir': 'E:/Desktop/Parkinson_py/dataset/image_dataset/spiral/training',
         'validation_data_dir': 'E:/Desktop/Parkinson_py/dataset/image_dataset/spiral/testing',
-        'epochs': 800,
+        'epochs': 200,
         'batch_size': 24,
         'zoom_range': 0.1,
         'rotation_range': 360,
@@ -131,8 +132,10 @@ if __name__ == '__main__':
         steps_per_epoch=3,
         epochs=model_params['epochs'],
         validation_data=validation_generator,
-        validation_steps=1
+        validation_steps=1,
     )
+
+
 
     model.evaluate( validation_generator )
 
@@ -140,4 +143,4 @@ if __name__ == '__main__':
 
     model_evaluation_plot()
 
-    # model.save_weights('spiral_2.h5')
+    model.save_weights('custom_cnn.h5')
